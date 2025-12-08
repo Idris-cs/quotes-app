@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} Quotes - Quotes App{% endblock %}
+
+{% block content %}
+<div class="category-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="category-header-content">
+            <div class="category-header-icon">{{ category.icon }}</div>
+            <h1>{{ category.name }} Quotes</h1>
+            <p class="category-header-subtitle">{{ category.description }}</p>
+            <span class="badge-count">{{ quotes|length }} quotes available</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="quotes-section">
+        <div class="quotes-grid">
+            {% if quotes %}
+                {% for quote in quotes %}
+                <div class="quote-card">
+                    <div class="quote-card-content">
+                        <p class="quote-card-text">
+                            <span class="quote-mark">"</span>{{ quote.text }}<span class="quote-mark">"</span>
+                        </p>
+                        <p class="quote-card-author">
+                            <i class="fas fa-pen-nib"></i> {{ quote.author }}
+                        </p>
+                        {% if quote.source %}
+                        <p class="quote-card-source">
+                            <i class="fas fa-link"></i> {{ quote.source }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="quote-card-actions">
+                        <button class="quote-action-btn" onclick="copyQuote('{{ quote.text }}', '{{ quote.author }}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="quote-action-btn" onclick="shareQuote('{{ quote.text }}', '{{ quote.author }}')">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-quotes">
+                    <i class="fas fa-inbox"></i>
+                    <p>No quotes found in this category yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="back-section">
+        <a href="/" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Categories
+        </a>
+    </div>
+</div>
+
+<div class="toast" id="copyToast">
+    <i class="fas fa-check-circle"></i> Quote copied to clipboard!
+</div>
+
+<script>
+    function copyQuote(text, author) {
+        const fullQuote = `"${text}" — ${author}`;
+        navigator.clipboard.writeText(fullQuote).then(() => {
+            showToast();
+        }).catch(err => console.error('Copy failed:', err));
+    }
+
+    function shareQuote(text, author) {
+        const fullQuote = `"${text}" — ${author}`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check out this quote!',
+                text: fullQuote
+            }).catch(err => console.error('Share failed:', err));
+        } else {
+            copyQuote(text, author);
+        }
+    }
+
+    function showToast() {
+        const toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+</script>
+{% endblock %}

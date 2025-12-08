@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Inspire Your Day</h1>
+        <p class="hero-subtitle">Discover thousands of inspiring quotes across various categories</p>
+        <button class="btn btn-primary" onclick="showSearch()">
+            <i class="fas fa-search"></i> Search Quotes
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <section class="categories-section">
+        <h2 class="section-title">Quote Categories</h2>
+        <div class="categories-grid">
+            {% for category in categories %}
+            <a href="{{ url_for('main.category', slug=category.slug) }}" class="category-card" style="--card-index: {{ loop.index }}">
+                <div class="category-icon">{{ category.icon }}</div>
+                <h3>{{ category.name }}</h3>
+                <p class="category-description">{{ category.description }}</p>
+                <div class="category-footer">
+                    <span class="quote-count">
+                        <i class="fas fa-quote-left"></i> {{ category.quote_count }} quotes
+                    </span>
+                    <span class="arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="featured-section">
+        <h2 class="section-title">Quote of the Day</h2>
+        <div class="featured-quote" id="featuredQuote">
+            <div class="loading">Loading...</div>
+        </div>
+        <button class="btn btn-secondary" onclick="loadFeaturedQuote()">
+            <i class="fas fa-sync"></i> Get Another
+        </button>
+    </section>
+</div>
+
+<script>
+    async function loadFeaturedQuote() {
+        try {
+            const response = await fetch('/api/quotes/random');
+            const data = await response.json();
+            
+            const quoteHtml = `
+                <blockquote class="quote-text">"${data.text}"</blockquote>
+                <p class="quote-author">— ${data.author}</p>
+                <p class="quote-category"><span class="badge">${data.category}</span></p>
+            `;
+            
+            const featuredQuote = document.getElementById('featuredQuote');
+            featuredQuote.style.opacity = '0';
+            setTimeout(() => {
+                featuredQuote.innerHTML = quoteHtml;
+                featuredQuote.style.opacity = '1';
+            }, 300);
+        } catch (error) {
+            console.error('Error loading quote:', error);
+        }
+    }
+
+    // Load featured quote on page load
+    document.addEventListener('DOMContentLoaded', loadFeaturedQuote);
+</script>
+{% endblock %}

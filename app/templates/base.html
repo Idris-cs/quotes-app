@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Quotes App - Inspire Your Day{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <a href="/" class="logo">
+                    <i class="fas fa-quote-left"></i> Quotes
+                </a>
+            </div>
+            <div class="navbar-menu">
+                <a href="/" class="navbar-item">Home</a>
+                <a href="#" class="navbar-item" onclick="showSearch()">Search</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSearch()">&times;</span>
+            <h2>Search Quotes</h2>
+            <input type="text" id="searchInput" placeholder="Search quotes..." class="search-input">
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Quotes App. All rights reserved.</p>
+            <p>
+                <a href="https://github.com/Idris-cs" target="_blank">GitHub</a> | 
+                <a href="https://Wa.me/23230486714" target="_blank">Whatsapp</a> | 
+                <a href="https://linkedin.com/in/idrissa-kargbo-920508396" target="_blank">LinkedIn</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function showSearch() {
+            document.getElementById('searchModal').style.display = 'block';
+            document.getElementById('searchInput').focus();
+        }
+
+        function closeSearch() {
+            document.getElementById('searchModal').style.display = 'none';
+            document.getElementById('searchResults').innerHTML = '';
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', async function(e) {
+            const query = this.value.trim();
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                let html = '';
+                if (data.quotes.length === 0) {
+                    html = '<p class="no-results">No quotes found</p>';
+                } else {
+                    html = data.quotes.map(quote => `
+                        <div class="search-result">
+                            <p class="search-quote">"${quote.text}"</p>
+                            <p class="search-author">— ${quote.author}</p>
+                            <p class="search-category"><i class="fas fa-tag"></i> ${quote.category}</p>
+                        </div>
+                    `).join('');
+                }
+                document.getElementById('searchResults').innerHTML = html;
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        });
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('searchModal');
+            if (event.target === modal) {
+                closeSearch();
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
