@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quotes-app"
+version = "0.0.0"
+description = "Quotes web app"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+# Tell Vercel how to locate the Flask WSGI app. It should import `run:app`.
+app = "run:app"
