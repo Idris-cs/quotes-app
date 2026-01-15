@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: quotes-app
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      # Load from .env file in project root
+      - DATABASE_URL=${DATABASE_URL}
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_CONNECT_RETRIES=${DB_CONNECT_RETRIES:-5}
+      - DB_CONNECT_BASE_DELAY=${DB_CONNECT_BASE_DELAY:-1.0}
+    volumes:
+      # Mount .env for runtime configuration
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/quotes/random"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - quotes-network
+
+networks:
+  quotes-network:
+    driver: bridge
