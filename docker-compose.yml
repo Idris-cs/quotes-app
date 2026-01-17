@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: quotes-app
+    env_file: backend/.env
     ports:
       - "${PORT:-8000}:8000"
     environment:
