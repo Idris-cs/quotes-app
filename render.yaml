@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: quotes-app
+    env: docker
+    plan: free
+    branch: main
+    buildCommand: docker build -f backend/Dockerfile -t quotes-app .
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 30 --chdir backend wsgi:app
+    healthCheckPath: /api/quotes/random
+    healthCheckInterval: 30
+    ports:
+      - port: 8000
+        protocol: HTTP
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: "False"
+      - key: PORT
+        value: "8000"
+    autoDeploy: true
