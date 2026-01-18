@@ -14,31 +14,40 @@
 
 ### Phase 1: Production Cloud Deployment (This Week)
 
-#### Option A: Deploy to Heroku (Easiest)
+#### Option A: Deploy to Render ⭐ (Recommended - Your Choice!)
 ```bash
-# 1. Install Heroku CLI
-# 2. Create Heroku account (free tier available)
-# 3. Login: heroku login
-# 4. Create app: heroku create quotes-app-{yourname}
-# 5. Set environment variables:
-heroku config:set DATABASE_URL=<your-supabase-url> \
-  SECRET_KEY=<your-secret-key> \
-  FLASK_ENV=production
-# 6. Deploy: git push heroku main
+# Fastest deployment - only 5 steps!
+# See RENDER_QUICK_START.md for immediate setup
+# Or RENDER_DEPLOYMENT.md for detailed guide
+
+# Summary:
+# 1. Push to GitHub (git push origin main)
+# 2. Sign up at https://render.com
+# 3. Connect your GitHub repo
+# 4. Add environment variables
+# 5. Deploy!
+
+# Your app will be live at: https://quotes-app-xxxxx.onrender.com
 ```
 
-#### Option B: Deploy to DigitalOcean App Platform
+#### Option B: Deploy to Heroku
+```bash
+# Similar to Render but free tier is limited
+# Takes ~15 minutes
+```
+
+#### Option C: Deploy to DigitalOcean App Platform
 - Create DigitalOcean account
 - Connect GitHub repo
 - Select Dockerfile for deployment
 - Automatic deploys on git push
 
-#### Option C: Deploy to AWS ECS/Fargate
+#### Option D: Deploy to AWS ECS/Fargate
 - Build and push Docker image to ECR
 - Create ECS task definition
 - Deploy through Fargate
 
-#### Option D: Self-Hosted VPS (e.g., DigitalOcean Droplet)
+#### Option E: Self-Hosted VPS (e.g., DigitalOcean Droplet)
 - Create Ubuntu VM ($5-12/month)
 - Install Docker and Docker Compose
 - Clone repo and run `docker-compose up -d`
@@ -101,39 +110,25 @@ heroku config:set DATABASE_URL=<your-supabase-url> \
 
 ---
 
-## Recommended First Step: Deploy to Heroku (Easiest)
+## Recommended First Step: Deploy to Render (Your Choice!)
 
-### Why Heroku?
-- ✅ Free tier available
+### Why Render?
+- ✅ **Easiest & Fastest** - Only 5 steps, ~5 minutes
+- ✅ Free tier actually works well
 - ✅ Automatic HTTPS
+- ✅ Better pricing than Heroku
 - ✅ Simple git-based deployment
-- ✅ Built-in logging
+- ✅ Built-in PostgreSQL database on free tier
 - ✅ Easy scaling
 
-### Quick Deployment Guide:
-```bash
-# 1. Create Heroku app
-heroku create quotes-app-yourname
-heroku stack:set container  # Tell Heroku to use Docker
+### Quick Deployment Steps:
 
-# 2. Set environment variables
-heroku config:set \
-  DATABASE_URL="postgresql://user:pass@host:port/db" \
-  SECRET_KEY="your-secret-key" \
-  FLASK_ENV="production" \
-  PORT="8000"
+**See [RENDER_QUICK_START.md](RENDER_QUICK_START.md) for 5-minute deployment**
 
-# 3. Create Procfile if needed (usually auto-detected)
-echo "web: gunicorn --chdir backend wsgi:app" > Procfile
+Or if you want detailed instructions:
+**See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for complete guide**
 
-# 4. Deploy
-git push heroku main
-
-# 5. View logs
-heroku logs --tail
-```
-
-Your app will be live at: `https://quotes-app-yourname.herokuapp.com`
+Your app will be live at: `https://quotes-app-yourname.onrender.com`
 
 ---
 
@@ -168,6 +163,15 @@ Cost breakdown:
 - Domain: $10/year
 - Database: Free tier (Supabase)
 - **Total: ~$5/month**
+
+---
+
+## Files for Render Deployment
+
+- **Quick Start (5 min):** [RENDER_QUICK_START.md](RENDER_QUICK_START.md)
+- **Detailed Guide:** [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
+- **Config File:** `render.yaml` (auto-detected)
+- **Env Template:** `.env.render.template`
 
 ---
 
@@ -253,12 +257,13 @@ Once deployed, monitor:
 
 ## Recommendation
 
-**Start with Heroku for fastest time-to-production:**
-1. Takes < 15 minutes to set up
+**Start with Render for fastest time-to-production:**
+1. Takes < 5 minutes to set up
 2. Automatic HTTPS
-3. Free tier available
-4. Easy to scale later
+3. Free tier actually works
+4. Better pricing than Heroku
+5. Easy to scale later
 
-Once on Heroku, you can always migrate to self-hosted or another platform later.
+**See [RENDER_QUICK_START.md](RENDER_QUICK_START.md) to get started right now!**
 
-Would you like help with any specific deployment target?
+Once on Render, you can always migrate to self-hosted or another platform later.
