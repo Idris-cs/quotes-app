@@ -21,7 +21,7 @@ services:
       - ./.env:/app/.env:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/quotes/random"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/quotes/random', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
