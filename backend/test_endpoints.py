@@ -35,16 +35,16 @@ def test_server_running():
     try:
         response = requests.get(f'{BASE_URL}/', timeout=TIMEOUT)
         print_status(f"Server is running (status: {response.status_code})", 'success')
-        return True
+        assert response.status_code == 200
     except requests.exceptions.ConnectionError:
         print_status(f"Cannot connect to {BASE_URL}", 'error')
         print_status("Make sure to run 'python run.py' from the backend directory", 'warning')
-        return False
+        assert False
     except Exception as e:
         print_status(f"Error: {e}", 'error')
-        return False
+        assert False
 
-def test_endpoint(name, endpoint, method='GET', expected_status=200):
+def check_endpoint(name, endpoint, method='GET', expected_status=200):
     """Test an API endpoint"""
     print_status(f"Testing {name}...", 'info')
     try:
@@ -79,56 +79,48 @@ def test_random_quote():
     print_status("Testing /api/quotes/random...", 'info')
     try:
         response = requests.get(f'{BASE_URL}/api/quotes/random', timeout=TIMEOUT)
-        if response.status_code == 200:
-            data = response.json()
-            if 'text' in data and 'author' in data:
-                print_status("✓ Random quote endpoint - Success", 'success')
-                print(f"  Quote: \"{data['text'][:80]}...\"")
-                print(f"  Author: {data['author']}")
-                print(f"  Category: {data.get('category', 'N/A')}")
-                return True
-            else:
-                print_status("✗ Random quote - Missing required fields", 'error')
-                return False
-        else:
-            print_status(f"✗ Random quote - Status {response.status_code}", 'error')
-            return False
+        assert response.status_code == 200
+        data = response.json()
+        assert 'text' in data and 'author' in data
+        print_status("✓ Random quote endpoint - Success", 'success')
+        print(f"  Quote: \"{data['text'][:80]}...\"")
+        print(f"  Author: {data['author']}")
+        print(f"  Category: {data.get('category', 'N/A')}")
+    except AssertionError:
+        print_status("✗ Random quote - Missing required fields or wrong status", 'error')
+        assert False
     except Exception as e:
         print_status(f"✗ Random quote - Error: {e}", 'error')
-        return False
+        assert False
 
 def test_search():
     """Test search endpoint"""
     print_status("Testing /api/search...", 'info')
     try:
         response = requests.get(f'{BASE_URL}/api/search?q=success', timeout=TIMEOUT)
-        if response.status_code == 200:
-            data = response.json()
-            if 'quotes' in data:
-                count = len(data['quotes'])
-                print_status(f"✓ Search endpoint - Found {count} quotes", 'success')
-                if count > 0:
-                    print(f"  First result: \"{data['quotes'][0]['text'][:80]}...\"")
-                return True
-            else:
-                print_status("✗ Search - Missing quotes field", 'error')
-                return False
-        else:
-            print_status(f"✗ Search - Status {response.status_code}", 'error')
-            return False
+        assert response.status_code == 200
+        data = response.json()
+        assert 'quotes' in data
+        count = len(data['quotes'])
+        print_status(f"✓ Search endpoint - Found {count} quotes", 'success')
+        if count > 0:
+            print(f"  First result: \"{data['quotes'][0]['text'][:80]}...\"")
+    except AssertionError:
+        print_status("✗ Search - Missing quotes field or wrong status", 'error')
+        assert False
     except Exception as e:
         print_status(f"✗ Search - Error: {e}", 'error')
-        return False
+        assert False
 
 def main():
     print(f"\n{Colors.BLUE}{'='*60}")
     print("QUOTES APP - ENDPOINT TEST SUITE")
     print(f"{'='*60}{Colors.END}\n")
     
-    results = []
-    
     # Test server
-    if not test_server_running():
+    try:
+        test_server_running()
+    except AssertionError:
         print_status("Cannot continue without running server", 'error')
         sys.exit(1)
     
@@ -137,38 +129,45 @@ def main():
     # Test endpoints
     print(f"\n{Colors.BLUE}Testing API Endpoints:{Colors.END}\n")
     
-    results.append(('Homepage', test_endpoint('Homepage', '/', expected_status=200)))
+    all_passed = True
+    
+    try:
+        check_endpoint('Homepage', '/', expected_status=200)
+        print_status("✓ Homepage", 'success')
+    except:
+        print_status("✗ Homepage", 'error')
+        all_passed = False
     time.sleep(0.5)
     
-    results.append(('Random Quote API', test_random_quote()))
+    try:
+        test_random_quote()
+    except:
+        all_passed = False
     time.sleep(0.5)
     
-    results.append(('Search API', test_search()))
+    try:
+        test_search()
+    except:
+        all_passed = False
     time.sleep(0.5)
     
-    results.append(('Categories', test_endpoint('Categories (Home Page)', '/', expected_status=200)))
-    time.sleep(0.5)
+    try:
+        check_endpoint('Categories (Home Page)', '/', expected_status=200)
+        print_status("✓ Categories", 'success')
+    except:
+        print_status("✗ Categories", 'error')
+        all_passed = False
     
     # Summary
     print(f"\n{Colors.BLUE}{'='*60}")
     print("TEST SUMMARY")
     print(f"{'='*60}{Colors.END}\n")
     
-    passed = sum(1 for _, result in results if result)
-    total = len(results)
-    
-    for test_name, result in results:
-        status = 'success' if result else 'error'
-        symbol = '✓' if result else '✗'
-        print_status(f"{symbol} {test_name}", status)
-    
-    print(f"\n{Colors.BLUE}Results: {Colors.GREEN}{passed}/{total} tests passed{Colors.END}\n")
-    
-    if passed == total:
+    if all_passed:
         print_status("All tests passed! Your app is working correctly.", 'success')
         sys.exit(0)
     else:
-        print_status(f"{total - passed} test(s) failed. Check the errors above.", 'error')
+        print_status("Some tests failed. Check the errors above.", 'error')
         sys.exit(1)
 
 if __name__ == '__main__':

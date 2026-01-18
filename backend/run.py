@@ -11,4 +11,5 @@ app = create_app(config_object=config_class)
 if __name__ == '__main__':
     # In production, use a WSGI server (gunicorn, etc.) instead of the development server
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
-    app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get('PORT', 8000))
+    app.run(debug=debug, host='0.0.0.0', port=port)

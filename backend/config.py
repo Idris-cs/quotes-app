@@ -19,9 +19,10 @@ class Config:
     # Database for persistent storage. Supports Supabase (Postgres) or local SQLite.
     # If using Supabase, set DATABASE_URL (example: postgresql://user:pass@host:5432/dbname)
     db_url = os.environ.get('DATABASE_URL')
-    if db_url and db_url.startswith('postgres://'):
+    if db_url:
         # SQLAlchemy prefers the 'postgresql+psycopg2' scheme
         db_url = db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+        db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
     SQLALCHEMY_DATABASE_URI = db_url or 'sqlite:///' + os.path.join(basedir, 'quotes.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

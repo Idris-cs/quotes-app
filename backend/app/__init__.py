@@ -11,8 +11,8 @@ def create_app(config_object='config.Config'):
     # Setup paths for templates and static files
     basedir = os.path.abspath(os.path.dirname(__file__))
     # Point to frontend templates directory
-    template_dir = os.path.abspath(os.path.join(basedir, '..', '..', 'frontend', 'templates', 'templates'))
-    static_dir = os.path.abspath(os.path.join(basedir, '..', '..', 'frontend', 'templates', 'templates', 'static'))
+    template_dir = os.path.abspath(os.path.join(basedir, '..', '..', 'frontend', 'templates'))
+    static_dir = os.path.abspath(os.path.join(basedir, '..', '..', 'frontend', 'static'))
     
     app = Flask(
         __name__, 
