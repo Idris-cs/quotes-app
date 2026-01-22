@@ -54,6 +54,14 @@
                 <blockquote class="quote-text">"${data.text}"</blockquote>
                 <p class="quote-author">— ${data.author}</p>
                 <p class="quote-category"><span class="badge">${data.category}</span></p>
+                <div class="quote-actions">
+                    <button class="btn btn-action" onclick="copyQuote(event)" data-text="${data.text}" data-author="${data.author}" title="Copy quote">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn btn-action" onclick="shareQuote(event)" data-text="${data.text}" data-author="${data.author}" title="Share quote">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
             `;
             
             const featuredQuote = document.getElementById('featuredQuote');
@@ -64,6 +72,49 @@
             }, 300);
         } catch (error) {
             console.error('Error loading quote:', error);
+        }
+    }
+
+    // Copy quote to clipboard
+    function copyQuote(event) {
+        const btn = event.target.closest('.btn-action');
+        const text = btn.getAttribute('data-text');
+        const author = btn.getAttribute('data-author');
+        const quoteText = `"${text}" — ${author}`;
+        
+        navigator.clipboard.writeText(quoteText).then(() => {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = 'var(--success-color)';
+            btn.style.color = 'white';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }).catch(() => {
+            alert('Failed to copy quote');
+        });
+    }
+
+    // Share quote
+    function shareQuote(event) {
+        const btn = event.target.closest('.btn-action');
+        const text = btn.getAttribute('data-text');
+        const author = btn.getAttribute('data-author');
+        const quoteText = `"${text}" — ${author}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Quote of the Day',
+                text: quoteText,
+                url: window.location.href
+            }).catch(err => console.log('Share cancelled:', err));
+        } else {
+            navigator.clipboard.writeText(quoteText).then(() => {
+                alert('Quote copied to clipboard!');
+            });
         }
     }
 

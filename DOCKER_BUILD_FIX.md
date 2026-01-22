@@ -79,10 +79,10 @@ docker-compose up -d
 # ✅ SUCCESS - Container starts and stays healthy
 
 # 3. Access app
-curl http://localhost:8000/api/quotes/random
+curl http://localhost:8000/api/quotes/
 # ✅ SUCCESS - Returns random quotes with HTTP 200
 ```
-
+random
 ---
 
 ## File Modified
