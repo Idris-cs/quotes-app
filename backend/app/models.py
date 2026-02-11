@@ -29,5 +29,21 @@ class Quote(db.Model):
     source = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relationship
+    favourites = db.relationship('Favourite', backref='quote', lazy='dynamic', cascade='all, delete-orphan')
+    
     def __repr__(self):
         return f'<Quote {self.id}>'
+
+class Favourite(db.Model):
+    __tablename__ = 'favourites'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    quote_id = db.Column(db.Integer, db.ForeignKey('quotes.id'), nullable=False)
+    session_id = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (db.UniqueConstraint('quote_id', 'session_id', name='unique_favourite'),)
+    
+    def __repr__(self):
+        return f'<Favourite {self.id}>'

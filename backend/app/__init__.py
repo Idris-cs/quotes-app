@@ -21,6 +21,9 @@ def create_app(config_object='config.Config'):
         static_url_path='/static'
     )
     app.config.from_object(config_object)
+    
+    # Set secret key for sessions
+    app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
     # Enable CORS for all routes
     CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -29,7 +32,7 @@ def create_app(config_object='config.Config'):
     migrate.init_app(app, db)
 
     # import models
-    from .models import Category, Quote
+    from .models import Category, Quote, Favourite
 
     # register blueprints
     from .main import main as main_bp
