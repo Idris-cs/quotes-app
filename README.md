@@ -67,6 +67,9 @@ quotes-app/
 └── README.md                       # This file
 ```
 
+## Overview
+![Quotes app](Screenshot.png)
+
 ## 🚀 Getting Started
 
 ### Prerequisites
