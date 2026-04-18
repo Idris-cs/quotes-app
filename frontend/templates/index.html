@@ -75,6 +75,66 @@
         }
     }
 
+<script>
+    async function loadFeaturedQuote() {
+        try {
+            const response = await fetch('/api/quotes/random');
+            const data = await response.json();
+            
+            // Check if it's already a favourite
+            const checkResponse = await fetch(`/api/favourites/${data.id}/check`);
+            const checkData = await checkResponse.json();
+            
+            const quoteHtml = `
+                <blockquote class="quote-text">"${data.text}"</blockquote>
+                <p class="quote-author">— ${data.author}</p>
+                <p class="quote-category"><span class="badge">${data.category}</span></p>
+                <div class="quote-actions">
+                    <button class="btn btn-action" id="favBtn-${data.id}" onclick="toggleFavourite(${data.id}, event)" data-quote-id="${data.id}" data-is-favourite="${checkData.is_favourite}" title="Add to favourites">
+                        <i class="fas ${checkData.is_favourite ? 'fa-heart' : 'fa-heart'}" style="color: ${checkData.is_favourite ? 'var(--danger-color)' : 'currentColor'}"></i>
+                        ${checkData.is_favourite ? 'Remove from Favourites' : 'Add to Favourites'}
+                    </button>
+                    <button class="btn btn-action" onclick="copyQuote(event)" data-text="${data.text}" data-author="${data.author}" title="Copy quote">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn btn-action" onclick="shareQuote(event)" data-text="${data.text}" data-author="${data.author}" title="Share quote">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            `;
+            
+            const featuredQuote = document.getElementById('featuredQuote');
+            featuredQuote.style.opacity = '0';
+            setTimeout(() => {
+                featuredQuote.innerHTML = quoteHtml;
+                featuredQuote.style.opacity = '1';
+            }, 300);
+        } catch (error) {
+            console.error('Error loading quote:', error);
+        }
+    }
+
+    async function toggleFavourite(quoteId, event) {
+        const btn = event.target.closest('.btn-action');
+        const isFavourite = btn.getAttribute('data-is-favourite') === 'true';
+        
+        try {
+            const method = isFavourite ? 'DELETE' : 'POST';
+            const response = await fetch(`/api/favourites/${quoteId}`, { method });
+            
+            if (response.ok) {
+                const newState = !isFavourite;
+                btn.setAttribute('data-is-favourite', newState);
+                const icon = btn.querySelector('i');
+                const newText = newState ? 'Remove from Favourites' : 'Add to Favourites';
+                icon.style.color = newState ? 'var(--danger-color)' : 'currentColor';
+                btn.innerHTML = `<i class="fas fa-heart" style="color: ${newState ? 'var(--danger-color)' : 'currentColor'}"></i> ${newText}`;
+            }
+        } catch (error) {
+            console.error('Error toggling favourite:', error);
+        }
+    }
+
     // Copy quote to clipboard
     function copyQuote(event) {
         const btn = event.target.closest('.btn-action');

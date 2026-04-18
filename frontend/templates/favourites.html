@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <section class="favourites-section">
+        <div class="section-header">
+            <h1 class="section-title">My Favourite Quotes</h1>
+            <p class="section-subtitle">Save your favourite quotes for quick access</p>
+        </div>
+
+        <div id="favouritesContainer">
+            <div class="loading-state">
+                <i class="fas fa-heart loading-icon"></i>
+                <p>Loading your favourites...</p>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-heart-broken"></i>
+            <h3>No Favourite Quotes Yet</h3>
+            <p>Start adding quotes to your favourites by clicking the heart icon on any quote!</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Explore Quotes
+            </a>
+        </div>
+    </section>
+</div>
+
+<script>
+    async function loadFavourites() {
+        try {
+            const response = await fetch('/api/favourites');
+            const data = await response.json();
+
+            const container = document.getElementById('favouritesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (data.count === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'block';
+            emptyState.style.display = 'none';
+
+            const quotesHtml = data.quotes.map(quote => `
+                <div class="quote-card">
+                    <div class="quote-content">
+                        <blockquote class="quote-text">"${escapeHtml(quote.text)}"</blockquote>
+                        <p class="quote-author">— ${escapeHtml(quote.author || 'Unknown')}</p>
+                        <div class="quote-meta">
+                            <span class="badge">${escapeHtml(quote.category)}</span>
+                        </div>
+                    </div>
+                    <div class="quote-card-actions">
+                        <button class="btn btn-action favourite-btn" onclick="removeFavourite(${quote.id})" title="Remove from favourites" data-quote-id="${quote.id}">
+                            <i class="fas fa-heart"></i> Remove
+                        </button>
+                        <button class="btn btn-action" onclick="copyQuote('${escapeHtml(quote.text).replace(/'/g, "\\'")}', '${escapeHtml(quote.author || 'Unknown').replace(/'/g, "\\'")}', event)" title="Copy quote">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button class="btn btn-action" onclick="shareQuote('${escapeHtml(quote.text).replace(/'/g, "\\'")}', '${escapeHtml(quote.author || 'Unknown').replace(/'/g, "\\'")}', event)" title="Share quote">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="quotes-list">${quotesHtml}</div>`;
+        } catch (error) {
+            console.error('Error loading favourites:', error);
+            document.getElementById('favouritesContainer').innerHTML = 
+                '<div class="error-state"><p>Failed to load favourites</p></div>';
+        }
+    }
+
+    async function removeFavourite(quoteId) {
+        try {
+            const response = await fetch(`/api/favourites/${quoteId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                await loadFavourites();
+            } else {
+                alert('Failed to remove from favourites');
+            }
+        } catch (error) {
+            console.error('Error removing favourite:', error);
+            alert('Error removing favourite');
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function copyQuote(text, author, event) {
+        const quoteText = `"${text}" — ${author}`;
+        
+        navigator.clipboard.writeText(quoteText).then(() => {
+            const btn = event.target.closest('.btn-action');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = 'var(--success-color)';
+            btn.style.color = 'white';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }).catch(() => {
+            alert('Failed to copy quote');
+        });
+    }
+
+    function shareQuote(text, author, event) {
+        const quoteText = `"${text}" — ${author}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Favourite Quote',
+                text: quoteText,
+                url: window.location.href
+            }).catch(err => console.log('Share cancelled:', err));
+        } else {
+            navigator.clipboard.writeText(quoteText).then(() => {
+                alert('Quote copied to clipboard!');
+            });
+        }
+    }
+
+    // Load favourites on page load
+    document.addEventListener('DOMContentLoaded', loadFavourites);
+</script>
+{% endblock %}
